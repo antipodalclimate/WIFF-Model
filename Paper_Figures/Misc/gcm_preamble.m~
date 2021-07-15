@@ -1,0 +1,91 @@
+clearvars -except *_path
+
+load([repo_path '/Misc/NN_params.mat']);
+
+%% Basic Setup
+
+df = f' * (sqrt(1.1) - sqrt(1/1.1));
+
+%% Load in files from each 
+lat = ncread([gcm_data_path 'NN_WIFF/iceh.cice_ml.2005.nc'],'TLAT'); 
+lon = ncread([gcm_data_path 'NN_WIFF/iceh.cice_ml.2005.nc'],'TLON'); 
+timer = ncread([gcm_data_path 'NN_WIFF/iceh.cice_ml.2005.nc'],'time'); 
+
+%%
+
+H_NN = ncread([gcm_data_path 'NN_WIFF/iceh.cice_ml.2005.nc'],'hi'); 
+C_NN = ncread([gcm_data_path 'NN_WIFF/iceh.cice_ml.2005.nc'],'aice'); 
+A_NN = permute(ncread([gcm_data_path 'NN_WIFF/iceh.cice_ml.2005.nc'],'frachist'),[1 2 4 3]);
+lat_NN = repmat(lat,[1 1 365]); 
+lon_NN = repmat(lon,[1 1 365]); 
+time_NN = repmat(permute(timer,[3 2 1]),[size(lat,1),size(lat,2)]); 
+
+
+use_NN = (H_NN < 4 & C_NN > .01 & sum(A_NN,4) > 1e-3);
+
+H_NN = H_NN(use_NN); 
+C_NN = C_NN(use_NN); 
+
+A_NN = reshape(A_NN,[],12); 
+A_NN = A_NN(use_NN,:); 
+
+N_NN = round(24.*sum(A_NN,2)); 
+A_NN = bsxfun(@rdivide,A_NN,sum(A_NN,2));
+
+lat_NN = lat_NN(use_NN); 
+lon_NN = lon_NN(use_NN); 
+time_NN = time_NN(use_NN); 
+
+%% Load in SP_WIFF_Data
+H_SP = ncread([gcm_data_path 'SP_WIFF/iceh.cice_stdconv.2005.incomplete.nc'],'hi'); 
+C_SP = ncread([gcm_data_path 'SP_WIFF/iceh.cice_stdconv.2005.incomplete.nc'],'aice'); 
+A_SP = permute(ncread([gcm_data_path 'SP_WIFF/iceh.cice_stdconv.2005.incomplete.nc'],'frachist'),[1 2 4 3]);
+lat_SP = repmat(lat,[1 1 365]); 
+lon_SP = repmat(lon,[1 1 365]); 
+time_SP = repmat(permute(timer,[3 2 1]),[size(lat,1),size(lat,2)]); 
+
+
+
+use_SP = (H_SP < 4 & C_SP > .01 & sum(A_SP,4) > 1e-3); 
+
+
+H_SP = H_SP(use_SP); 
+C_SP = C_SP(use_SP); 
+
+A_SP = reshape(A_SP,[],12); 
+A_SP = A_SP(use_SP,:); 
+
+N_SP = round(24.*sum(A_SP,2)); 
+A_SP = bsxfun(@rdivide,A_SP,sum(A_SP,2)); 
+
+lat_SP = lat_SP(use_SP); 
+lon_SP = lon_SP(use_SP); 
+time_SP = time_SP(use_SP); 
+
+%% Load in SP_WIFF_1 Data
+H_SP_1 = ncread([gcm_data_path 'SP_WIFF_1/iceh.cice_std1iter.2005.nc'],'hi'); 
+C_SP_1 = ncread([gcm_data_path 'SP_WIFF_1/iceh.cice_std1iter.2005.nc'],'aice'); 
+A_SP_1 = permute(ncread([gcm_data_path 'SP_WIFF_1/iceh.cice_std1iter.2005.nc'],'frachist'),[1 2 4 3]);
+lat_NN = repmat(lat,[1 1 365]); 
+lon_NN = repmat(lon,[1 1 365]); 
+time_NN = repmat(permute(timer,[3 2 1]),[size(lat,1),size(lat,2)]); 
+
+
+use_SP_1 = (H_SP_1 < 4 & C_SP_1 > .01 & sum(A_SP_1,4) > 1e-3); 
+
+
+H_SP_1 = H_SP_1(use_SP_1); 
+C_SP_1 = C_SP_1(use_SP_1); 
+
+A_SP_1 = reshape(A_SP_1,[],12); 
+A_SP_1 = A_SP_1(use_SP_1,:); 
+
+N_SP_1 = round(24.*sum(A_SP_1,2)); 
+A_SP_1 = bsxfun(@rdivide,A_SP_1,sum(A_SP_1,2)); 
+
+lat_SP = lat_SP(use_SP); 
+lon_SP = lon_SP(use_SP); 
+time_SP = time_SP(use_SP); 
+
+%%
+clear use_* 

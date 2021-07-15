@@ -7,7 +7,7 @@ repo_path = '/Users/chorvat/Dropbox (Brown)/Research Projects/Active/WIFF-Model/
 % Location of parameters for the Neural net. 
 % Contains f, redge,rcent
 training_path = '/Users/chorvat/Dropbox (Brown)/Research Projects/Active/Data/Neural_Net_Data/6-hourly-2009/NN-results.mat'; 
-gcm_data_path = '/Users/chorvat/Dropbox (Brown)/Research Projects/Active/Data/Neural_Net_Data/GCM_output_2005/'; 
+gcm_data_path = '/Users/chorvat/Dropbox (Brown)/Research Projects/Active/Data/Neural_Net_Data/GCM_Data_2005/'; 
 plot_path = [repo_path '/Paper_Figures/Plot_Tools/']; 
 misc_path = [repo_path '/Paper_Figures/Misc/']; 
 
@@ -36,7 +36,7 @@ make_fig_2;
 %%
 gcm_preamble; 
 
-addpath([thisdir_path '/Fig-3/']); 
+addpath([figure_path '/Fig-3/']); 
 
 make_fig_3; 
 
