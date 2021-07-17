@@ -133,4 +133,6 @@ end
 pos = [6.5 4]; 
 set(gcf,'windowstyle','normal','position',[0 0 pos],'paperposition',[0 0 pos],'papersize',pos,'units','inches','paperunits','inches');
 set(gcf,'windowstyle','normal','position',[0 0 pos],'paperposition',[0 0 pos],'papersize',pos,'units','inches','paperunits','inches');
-saveas(gcf,[figure_save_path '/Fig-2/Fig-2.pdf']); 
+print('/Users/chorvat/Dropbox (Brown)/Apps/Overleaf/Light-under-Antarctic-Ice/Figures/Fig-0/Fig-0b','-dpdf','-r1200');
+
+print([figure_save_path 'Fig-2/Fig-2.pdf'],'-dpdf','-r1200');

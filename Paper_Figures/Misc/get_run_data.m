@@ -1,4 +1,4 @@
-function [thick,conc,frac_hist,N,lat,lon,timevec]= get_run_data(fileloc,Cbnd,Hbnd)
+function [thick,conc,frac_hist,N,lat,lon,timevec,inds]= get_run_data(fileloc,Cbnd,Hbnd)
 
 Cmin = Cbnd(1); 
 Hmin = Hbnd(1); 
@@ -8,6 +8,7 @@ thick = ncread(fileloc,'hi');
 conc = ncread(fileloc,'aice'); 
 frac_hist = permute(ncread(fileloc,'frachist'),[1 2 4 3]);
 
+
 lat = ncread(fileloc,'TLAT'); 
 lon = ncread(fileloc,'TLON'); 
 timevec = ncread(fileloc,'time'); 
@@ -16,8 +17,9 @@ lat = repmat(lat,[1 1 length(timevec)]);
 lon = repmat(lon,[1 1 length(timevec)]); 
 timevec = repmat(permute(timevec,[3 2 1]),[size(lat,1),size(lat,2)]); 
 
+use = (thick < Hmax & thick > Hmin & conc > Cmin & sum(frac_hist,4) > 1/25);
 
-use = (thick < Hmax & thick > Hmin & conc > Cmin & sum(frac_hist,4) > 1e-3);
+inds = find(use); 
 
 thick = thick(use); 
 conc = conc(use); 
