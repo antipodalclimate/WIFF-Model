@@ -1,125 +1,140 @@
-%% Make_Fig_2.m
+%% Make_Fig_1.m
 % Creates the first figure in Horvat and Roach (2021). 
 % This code starts as if drive_plotting and training_preamble have both
 % been called previously. 
-figure(2) 
-clf
+
+
+figure(2)
+clf; clear Ax; 
+
+%% Group error by input energy/concentration/thickness
+
+[NC,~,bX] = histcounts(conc,Cbins);  
+errC = accumarray(bX,perc_error,[nbins_C 1],@nanmedian); 
+varC = accumarray(bX,perc_error,[nbins_C 1],@iqr);
+
+[NH,~,bX] = histcounts(thick,Hbins);  
+errH = accumarray(bX,perc_error,[nbins_H 1],@nanmedian); 
+varH = accumarray(bX,perc_error,[nbins_H 1],@iqr);
+
+
+[NE,~,bX] = histcounts(E,Ebins);  
+errE = accumarray(bX,perc_error,[nbins_E 1],@nanmedian); 
+varE = accumarray(bX,perc_error,[nbins_E 1],@iqr);
+
+
+[NR,~,bX] = histcounts(mean_FS_true,Rbins);  
+errR = accumarray(bX,perc_error,[nbins_R 1],@nanmedian); 
+varR = accumarray(bX,perc_error,[nbins_R 1],@iqr);
+errR(NR < 1) = nan; 
+varR(NR < 1) = nan; 
+
 
 %%
+horvat_colors; 
 
-[NCH,~,~,bX,bY] = histcounts2(conc,thick,Cbins,Hbins); 
-indCH = sub2ind([nbins_C nbins_H],bX,bY); 
+Ax{1} = subplot(321);
 
-[NCE,~,~,bX,bY] = histcounts2(conc,E,Cbins,Ebins); 
-indCE = sub2ind([nbins_C nbins_E],bX,bY); 
-
-[NHE,~,~,bX,bY] = histcounts2(thick,E,Hbins,Ebins); 
-indHE = sub2ind([nbins_H nbins_E],bX,bY); 
-
-[NRE,~,~,bX,bY] = histcounts2(mean_FS_true,E,Rbins,Ebins); 
-indRE = sub2ind([nbins_R nbins_E],bX,bY); 
-
-[NHR,~,~,bX,bY] = histcounts2(thick,mean_FS_true,Hbins,Rbins); 
-indHR = sub2ind([nbins_H nbins_R],bX,bY); 
-
-[NRC,~,~,bX,bY] = histcounts2(mean_FS_true,conc,Rbins,Cbins); 
-indRC = sub2ind([nbins_R nbins_C],bX,bY); 
-
-errCH = reshape(accumarray(indCH,perc_error,[nbins_C*nbins_H 1],@mean),[nbins_C nbins_H]); 
-errCE = reshape(accumarray(indCE,perc_error,[nbins_C*nbins_E 1],@mean),[nbins_C nbins_E]); 
-errHE = reshape(accumarray(indHE,perc_error,[nbins_H*nbins_E 1],@mean),[nbins_H nbins_E]); 
-errRE = reshape(accumarray(indRE,perc_error,[nbins_R*nbins_E 1],@mean),[nbins_R nbins_E]); 
-errHR = reshape(accumarray(indHR,perc_error,[nbins_R*nbins_H 1],@mean),[nbins_H nbins_R]); 
-errRC = reshape(accumarray(indRC,perc_error,[nbins_R*nbins_C 1],@mean),[nbins_R nbins_C]); 
-
-num_tot = length(mean_FS_true); 
-num_cutoff = num_tot / (2*100*100); % .01 % cutoff
-
-errRC(NRC < num_cutoff) = nan; 
-errHR(NHR < num_cutoff) = nan; 
-errRE(NRE < num_cutoff) = nan; 
-errHE(NHE < num_cutoff) = nan; 
-errCE(NCE < num_cutoff) = nan; 
-errCH(NCH < num_cutoff) = nan; 
-
-%% Geographic plots
-
-% latvec = linspace(-90,90,360); 
-% lonvec = linspace(0,360,365); 
-% 
-% [LAT,LON] = meshgrid(latvec,lonvec);
-% earthellipsoid = referenceSphere('earth','km');
-% lldist = @(x,y) distance(x,y,earthellipsoid);
-% 
-% M = createns([LAT(:) LON(:)],'Distance',lldist);
-% 
-% ID = knnsearch(M,[latsave(1:1000),lonsave(1:1000)],'K',1,'Distance',lldist);
-% 
-% 
-% 
-% %%
-% 
-% err_geo = accumarray(ID,perc_error,[length(latvec)*length(lonvec) 1],@mean); 
-% 
-
-%%
-climmer = [0 50]; 
-
-
-Ax{1} = subplot('position',[.05 .55 .25 .4]);
-pcolor(Cbins(1:end-1),Ebins(1:end-1),errCE'); shading flat; grid on; box on;  
-set(gca,'clim',climmer,'xticklabel','');
-xlim(Clims); ylim(Elims); 
-% xlabel('Ice Concentration','interpreter','latex'); 
-ylabel('$\log_{10}$ Wave Energy','interpreter','latex'); 
-
-Ax{2} = subplot('position',[.365 .55 .25 .4]);
-pcolor(Hbins(1:end-1),Ebins(1:end-1),errHE'); shading flat; grid on; box on; 
-set(gca,'clim',climmer,'xticklabel','');
-xlim(Hlims); ylim(Elims); 
-% xlabel('$\log_{10}$ Wave Energy','interpreter','latex'); 
-%ylabel('Ice Thickness','interpreter','latex'); 
-
-Ax{3} =  subplot('position',[.68 .55 .25 .4]);
-pcolor(Rbins(1:end-1),Ebins(1:end-1),errRE'); shading flat; grid on; box on; 
-set(gca,'clim',climmer); 
-set(gca,'xscale','log','xticklabel','');
-set(gca,'clim',climmer); 
-xlim(Rlims); ylim(Elims); 
-% xlabel('Rep Radius','interpreter','latex'); 
-% ylabel('Ice Thickness','interpreter','latex'); 
-
-
-Ax{4} = subplot('position',[.05 .1 .25 .4]); 
-pcolor(Cbins(1:end-1),Hbins(1:end-1),errCH'); shading flat; grid on; box on; 
-set(gca,'clim',climmer); 
-xlim(Clims); ylim(Hlims); 
+yyaxis left; set(gca,'ycolor','k'); 
+histogram(conc,Cbins,'normalization','probability','facecolor',clabs(1,:),'edgecolor','none');
+grid on; box on; xlim(Clims);  
 xlabel('Ice Concentration','interpreter','latex'); 
-ylabel('Ice Thickness (m)','interpreter','latex'); 
+ylabel('N(C)dC','interpreter','latex','color',clabs(1,:)); 
+xlim(Clims);
 
-Ax{5} = subplot('position',[.365 .1 .25 .4]); 
-pcolor(Hbins(1:end-1),Rbins(1:end-1),errHR'); shading flat; grid on; box on; 
-set(gca,'clim',climmer); 
-set(gca,'yscale','log'); 
-xlim(Hlims); ylim(Rlims); 
+yyaxis right; set(gca,'ycolor','k'); 
+plot(Cbins(1:end-1),errC,'k','linewidth',1); 
+hold on
+plot(Cbins(1:end-1),errC+varC/2,'--k','linewidth',0.5); 
+plot(Cbins(1:end-1),errC-varC/2,'--k','linewidth',0.5); 
+hold off
+xlim(Clims); 
+ylim([0 15]);
+ylabel('RSE (\%)','interpreter','latex'); 
+
+Ax{2} = subplot(322);
+
+yyaxis left; set(gca,'ycolor','k'); 
+histogram(thick,Hbins,'normalization','probability','facecolor',clabs(1,:),'edgecolor','none');
+grid on; box on; xlim(Hlims); 
+ylabel('N(H)dH','interpreter','latex','color',clabs(1,:)); 
 xlabel('Ice Thickness','interpreter','latex'); 
-ylabel('R (m)','interpreter','latex'); 
+xlim(Hlims);
 
-Ax{6} = subplot('position',[.68 .1 .25 .4]); 
-pcolor(Rbins(1:end-1),Cbins(1:end-1),errRC'); shading flat; grid on; box on; 
-set(gca,'xscale','log');
-set(gca,'clim',climmer); 
-xlim(Rlims); ylim(Clims); 
-xlabel('R (m)','interpreter','latex'); 
-ylabel('Ice Concentration','interpreter','latex'); 
+yyaxis right; set(gca,'ycolor','k'); 
+plot(Hbins(1:end-1),errH,'k','linewidth',1); 
+hold on
+plot(Hbins(1:end-1),errH+varH/2,'--k','linewidth',0.5); 
+plot(Hbins(1:end-1),errH-varH/2,'--k','linewidth',0.5); 
+hold off
+xlim(Hlims); ylim([0 15]); 
+ylabel('RSE (\%)','interpreter','latex'); 
+
+Ax{3} = subplot(323);
+
+yyaxis left; set(gca,'ycolor','k'); 
+histogram(E,Ebins,'normalization','probability','facecolor',clabs(1,:),'edgecolor','none');
+grid on; box on; xlim(Elims); 
+xlabel('Log$_{10}$ Wave Energy','interpreter','latex'); 
+ylabel('N(E)dE','interpreter','latex','color',clabs(1,:)); 
+xlim(Elims);
 
 
-colormap(cmocean('balance','pivot',10,25)); 
+yyaxis right; set(gca,'ycolor','k'); 
+plot(Ebins(1:end-1),errE,'k','linewidth',1); 
+hold on
+plot(Ebins(1:end-1),errE+varE/2,'--k','linewidth',0.5); 
+plot(Ebins(1:end-1),errE-varE/2,'--k','linewidth',0.5); 
+hold off
+xlim(Elims); 
+ylim([0 15]); 
+ylabel('RSE (\%)','interpreter','latex'); 
+
+Ax{4} = subplot(324); 
+
+yyaxis left; set(gca,'ycolor','k'); 
+histogram(mean_FS_true,Rbins,'normalization','probability','facecolor',clabs(1,:),'edgecolor','none');
+grid on; box on; xlim(Rlims); 
+xlabel('$\overline{R}$','interpreter','latex'); 
+ylabel('N(R)dR','interpreter','latex','color',clabs(1,:)); 
+set(gca,'xscale','log'); 
+xlim(Rlims); 
+
+yyaxis right; set(gca,'ycolor','k'); 
+plot(Rbins(1:end-1),errR,'k','linewidth',1); 
+hold on
+plot(Rbins(1:end-1),errR+varR/2,'--k','linewidth',0.5); 
+plot(Rbins(1:end-1),errR-varR/2,'--k','linewidth',0.5); 
+hold off
+set(gca,'xscale','log'); 
+xlim(Rlims); 
+ylim([0 25]); 
+ylabel('RSE (\%)','interpreter','latex'); 
+
+%%
 
 
+Ax{5} = subplot(313);
+
+varvals = nanstd(Y_pred - Y_true,[],1); 
+semilogx(rcent,nanmean(Y_true,1),'k','linewidth',2); 
+hold on
+semilogx(rcent,nanmean(Y_pred,1),'r','linewidth',1);
+semilogx(rcent,nanmean(Y_true,1)+varvals,'--k','linewidth',0.5); 
+% 
+semilogx(rcent,nanmean(Y_true,1)-varvals,'--k','linewidth',0.5); 
+hold off
+grid on; box on; 
+ylim([0 .5]);
+xlim(Rlims); 
+xlabel('Floe Size (m)','interpreter','latex'); ylabel('FSD (\o)','interpreter','latex'); 
+legend('True','Predicted'); 
 
 
-colorbar('position',[.95 .125 .01 .8]); 
+%%
+letter = {'(a)','(b)','(c)','(d)','(e)','(f)','(g)','(e)','(c)'};
+
+delete(findall(gcf,'Tag','legtag'))
 
 for i = 1:length(Ax)
     
@@ -127,12 +142,13 @@ for i = 1:length(Ax)
 
     set(Ax{i},'fontname','helvetica','fontsize',8,'xminortick','on','yminortick','on')
     
+    annotation('textbox',[posy(1) posy(2)+posy(4) - .02 .025 .025], ...
+        'String',letter{i},'LineStyle','none','FontName','Helvetica', ...
+        'FontSize',8,'Tag','legtag');
     
 end
 
 pos = [6.5 4]; 
 set(gcf,'windowstyle','normal','position',[0 0 pos],'paperposition',[0 0 pos],'papersize',pos,'units','inches','paperunits','inches');
 set(gcf,'windowstyle','normal','position',[0 0 pos],'paperposition',[0 0 pos],'papersize',pos,'units','inches','paperunits','inches');
-print('/Users/chorvat/Dropbox (Brown)/Apps/Overleaf/Light-under-Antarctic-Ice/Figures/Fig-0/Fig-0b','-dpdf','-r1200');
-
-print([figure_save_path 'Fig-2/Fig-2.pdf'],'-dpdf','-r1200');
+saveas(gcf,[figure_save_path '/Fig-2/Fig-2.pdf']); 

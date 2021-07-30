@@ -25,11 +25,11 @@ Rbins = [logspace(log10(rcent(1)),log10(rcent(end)),nbins_R) Inf]';
 Hlims = [0 3];
 Clims = [0 1];
 Elims = [-3 1];
-Rlims = [rcent(1) rcent(end)]; 
+Rlims = [rcent(2) .8*rcent(end)]; 
 
 %% Some Derived Quantities
 
 mean_FS_true = squeeze(nansum(bsxfun(@times,rcent,Y_true),2));
 mean_FS_pred = squeeze(nansum(bsxfun(@times,rcent,Y_pred),2));
-perc_error = 100*(mean_FS_true - mean_FS_pred)./ (.5*(mean_FS_true + mean_FS_pred));
+perc_error = 100*abs(mean_FS_true - mean_FS_pred)./ (.5*(mean_FS_true + mean_FS_pred));
 

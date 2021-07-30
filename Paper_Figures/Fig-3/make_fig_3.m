@@ -1,175 +1,129 @@
-clearvars -except *_path
-
-load([gcm_data_path 'comp_data']); 
-load([repo_path '/Misc/NN_params.mat']);
-
-%% Want the intersection of locations and times
-% have inds_SP, inds_NN, inds_SP_1
-% 
-
-num_cutoff = 24; 
-time_end = 366; % Ignore day 365
-time_beg = 0; % Ignore day 1
-e_cutoff = (.1/4)^2; 
-c_cutoff = 0.1; 
-
-[inds_dual,iA,iB] = intersect(inds_SP,inds_NN); 
-[inds_trio,iC,iD] = intersect(inds_dual,inds_SP_1); 
-
-C_SP_1_int = C_SP_1(iD,:); 
-C_SP_int = C_SP(iA(iC),:); 
-C_NN_int = C_NN(iB(iC),:); 
-
-A_SP_1_int = A_SP_1(iD,:); 
-A_SP_int = A_SP(iA(iC),:); 
-A_NN_int = A_NN(iB(iC),:); 
-
-N_SP_1_int = N_SP_1(iD); 
-N_SP_int = N_SP(iA(iC)); 
-N_NN_int = N_NN(iB(iC)); 
-
-time_int = time_SP_1(iD); 
-lat_int = lat_SP_1(iD); 
-lon_int = lon_SP_1(iD); 
-E_int = E_SP_1(iD); 
-
-N_daily_NN = accumarray(time_NN(lat_NN < 0),1 + 0*N_NN(lat_NN < 0),[365 1],@sum); 
-N_daily_SP = accumarray(time_SP(lat_SP < 0),1 + 0*N_SP(lat_SP < 0),[365 1],@sum); 
-N_daily_SP_1 = accumarray(time_SP_1(lat_SP_1 < 0),1 + 0*N_SP_1(lat_SP_1 < 0),[365 1],@sum); 
-
-use_int = ... %(N_SP_1_int > num_cutoff & N_NN_int > num_cutoff & N_SP_int > num_cutoff ...
-    (C_SP_1_int > c_cutoff & C_NN_int > c_cutoff & C_SP_int > c_cutoff ...
-    & E_int > e_cutoff & time_int < time_end & time_int > time_beg ); 
-
-
-
-%
-
-close all
-horvat_colors
-
+%% Make_Fig_2.m
+% Creates the first figure in Horvat and Roach (2021). 
+% This code starts as if drive_plotting and training_preamble have both
+% been called previously. 
 figure(3)
-
-Ax{1} = subplot('position',[.075 .6 .4 .35]);
-
-sub_SP = A_SP_int(use_int & lat_int > 0,:); 
-sub_NN = A_NN_int(use_int & lat_int > 0,:); 
-sub_SP_1 = A_SP_1_int(use_int & lat_int > 0,:);
-
-% iqr_SP_NN = iqr(sub_SP-sub_NN); 
-% iqr_SP_SP_1 = iqr(sub_SP - sub_SP_1); 
-bottom = prctile(sub_SP,25,1); 
-top = prctile(sub_SP,75,1);  
-
-semilogx(rcent,median(sub_SP,1),'color','k','linewidth',1)
-hold on; 
-
-semilogx(rcent,median(sub_NN,1),'color',clabs(2,:),'linewidth',1)
-semilogx(rcent,median(sub_SP_1,1),'--','color',clabs(1,:),'linewidth',1)
-
-semilogx(rcent,top,'--k','linewidth',0.5); 
-semilogx(rcent,bottom,'--k','linewidth',0.5); 
-% hold off
-grid on; box on; 
-xlim([rcent(1) rcent(end)]); 
-
-
-xlabel('Floe Size (m)','interpreter','latex'); 
-ylabel('A$_i$dr$_i$','interpreter','latex'); 
-p = legend('SP-WIFF','NN-WIFF','SP-WIFF-1','interpreter','latex');
-set(p,'ItemTokenSize',[25 25])
-title('Median Arctic Histogram','interpreter','latex'); 
-
-
-%
-Ax{2} = subplot('position',[.565 .6 .4 .35]);
-
-sub_SP = A_SP_int(use_int & lat_int < 0,:); 
-sub_NN = A_NN_int(use_int & lat_int < 0,:); 
-sub_SP_1 = A_SP_1_int(use_int & lat_int < 0,:);
-
-% iqr_SP_NN = iqr(sub_SP-sub_NN); 
-% iqr_SP_SP_1 = iqr(sub_SP - sub_SP_1); 
-bottom = prctile(sub_SP,25,1); 
-top = prctile(sub_SP,75,1);  
-
-
-semilogx(rcent,median(sub_SP,1),'color','k','linewidth',1)
-hold on; 
-semilogx(rcent,median(sub_NN,1),'color',clabs(2,:),'linewidth',1)
-semilogx(rcent,median(sub_SP_1,1),'--','color',clabs(1,:),'linewidth',1)
-semilogx(rcent,top,'--k','linewidth',0.5); 
-semilogx(rcent,bottom,'--k','linewidth',0.5); 
-
-hold off
-grid on; box on; 
-xlim([rcent(1) rcent(end)]); 
-
-p = legend('SP-WIFF','NN-WIFF','SP-WIFF-1','interpreter','latex');
-set(p,'ItemTokenSize',[25 25])
-xlabel('Floe Size (m)','interpreter','latex'); 
-ylabel('A$_i$dr$_i$','interpreter','latex'); 
-title('Median Antarctic Histogram','interpreter','latex'); 
+clf; clear Ax; 
 
 %%
-Ax{3} = subplot('position',[.075 .15 .4 .35]);
 
-xbins = [linspace(0,1,200) Inf]; 
+[NCH,~,~,bX,bY] = histcounts2(conc,thick,Cbins,Hbins); 
+indCH = sub2ind([nbins_C nbins_H],bX,bY); 
 
-SAE_1 = sum(abs(A_SP_int - A_NN_int),2);
-RSE_1 = sum(rcent.*abs(A_SP_int - A_NN_int),2) ./ sum(rcent.*A_SP_int,2); 
+[NCE,~,~,bX,bY] = histcounts2(conc,E,Cbins,Ebins); 
+indCE = sub2ind([nbins_C nbins_E],bX,bY); 
 
-SAE_2 = sum(abs(A_SP_int - A_SP_1_int),2);
-RSE_2 = sum(rcent.*abs(A_SP_int - A_SP_1_int),2) ./ sum(rcent.*A_SP_int,2); 
+[NHE,~,~,bX,bY] = histcounts2(thick,E,Hbins,Ebins); 
+indHE = sub2ind([nbins_H nbins_E],bX,bY); 
+
+[NRE,~,~,bX,bY] = histcounts2(mean_FS_true,E,Rbins,Ebins); 
+indRE = sub2ind([nbins_R nbins_E],bX,bY); 
+
+[NHR,~,~,bX,bY] = histcounts2(thick,mean_FS_true,Hbins,Rbins); 
+indHR = sub2ind([nbins_H nbins_R],bX,bY); 
+
+[NRC,~,~,bX,bY] = histcounts2(mean_FS_true,conc,Rbins,Cbins); 
+indRC = sub2ind([nbins_R nbins_C],bX,bY); 
+
+errCH = reshape(accumarray(indCH,perc_error,[nbins_C*nbins_H 1],@median),[nbins_C nbins_H]); 
+errCE = reshape(accumarray(indCE,perc_error,[nbins_C*nbins_E 1],@median),[nbins_C nbins_E]); 
+errHE = reshape(accumarray(indHE,perc_error,[nbins_H*nbins_E 1],@median),[nbins_H nbins_E]); 
+errRE = reshape(accumarray(indRE,perc_error,[nbins_R*nbins_E 1],@median),[nbins_R nbins_E]); 
+errHR = reshape(accumarray(indHR,perc_error,[nbins_R*nbins_H 1],@median),[nbins_H nbins_R]); 
+errRC = reshape(accumarray(indRC,perc_error,[nbins_R*nbins_C 1],@median),[nbins_R nbins_C]); 
+
+num_tot = length(mean_FS_true); 
+num_cutoff = num_tot / (2*100*100); % .01 % cutoff
+
+errRC(NRC < num_cutoff) = nan; 
+errHR(NHR < num_cutoff) = nan; 
+errRE(NRE < num_cutoff) = nan; 
+errHE(NHE < num_cutoff) = nan; 
+errCE(NCE < num_cutoff) = nan; 
+errCH(NCH < num_cutoff) = nan; 
+
+%% Geographic plots
+
+% latvec = linspace(-90,90,360); 
+% lonvec = linspace(0,360,365); 
+% 
+% [LAT,LON] = meshgrid(latvec,lonvec);
+% earthellipsoid = referenceSphere('earth','km');
+% lldist = @(x,y) distance(x,y,earthellipsoid);
+% 
+% M = createns([LAT(:) LON(:)],'Distance',lldist);
+% 
+% ID = knnsearch(M,[latsave(1:1000),lonsave(1:1000)],'K',1,'Distance',lldist);
+% 
+% 
+% 
+% %%
+% 
+% err_geo = accumarray(ID,perc_error,[length(latvec)*length(lonvec) 1],@median); 
+% 
+
+%%
+climmer = [0 50]; 
+
+
+Ax{1} = subplot('position',[.05 .55 .25 .4]);
+pcolor(Cbins(1:end-1),Ebins(1:end-1),errCE'); shading flat; grid on; box on;  
+set(gca,'clim',climmer,'xticklabel','');
+xlim(Clims); ylim(Elims); 
+xlabel('Ice Concentration','interpreter','latex'); 
+ylabel('$\log_{10}$ Wave Energy','interpreter','latex'); 
+
+Ax{2} = subplot('position',[.365 .55 .25 .4]);
+pcolor(Hbins(1:end-1),Ebins(1:end-1),errHE'); shading flat; grid on; box on; 
+set(gca,'clim',climmer,'xticklabel','');
+xlim(Hlims); ylim(Elims); 
+ylabel('$\log_{10}$ Wave Energy','interpreter','latex'); 
+xlabel('Ice Thickness','interpreter','latex'); 
+
+Ax{3} =  subplot('position',[.68 .55 .25 .4]);
+pcolor(Rbins(1:end-1),Ebins(1:end-1),errRE'); shading flat; grid on; box on; 
+set(gca,'clim',climmer); 
+set(gca,'xscale','log','xticklabel','');
+set(gca,'clim',climmer); 
+xlim(Rlims); ylim(Elims); 
+xlabel('Rep Radius','interpreter','latex'); 
+ylabel('$\log_{10}$ Wave Energy','interpreter','latex'); 
+
+
+Ax{4} = subplot('position',[.05 .1 .25 .4]); 
+pcolor(Cbins(1:end-1),Hbins(1:end-1),errCH'); shading flat; grid on; box on; 
+set(gca,'clim',climmer); 
+xlim(Clims); ylim(Hlims); 
+xlabel('Ice Concentration','interpreter','latex'); 
+ylabel('Ice Thickness (m)','interpreter','latex'); 
+
+Ax{5} = subplot('position',[.365 .1 .25 .4]); 
+pcolor(Hbins(1:end-1),Rbins(1:end-1),errHR'); shading flat; grid on; box on; 
+set(gca,'clim',climmer); 
+set(gca,'yscale','log'); 
+xlim(Hlims); ylim(Rlims); 
+xlabel('Ice Thickness','interpreter','latex'); 
+ylabel('Rep Radius','interpreter','latex'); 
+
+Ax{6} = subplot('position',[.68 .1 .25 .4]); 
+pcolor(Rbins(1:end-1),Cbins(1:end-1),errRC'); shading flat; grid on; box on; 
+set(gca,'xscale','log');
+set(gca,'clim',climmer); 
+xlim(Rlims); ylim(Clims); 
+ylabel('Rep Radius','interpreter','latex'); 
+ylabel('Ice Concentration','interpreter','latex'); 
+
+
+colormap(cmocean('balance','pivot',10,25)); 
 
 
 
-NS1 = histcounts(SAE_1(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NR1 = histcounts(RSE_1(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NS2 = histcounts(SAE_2(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NR2 = histcounts(RSE_2(use_int & lat_int < 0,:),xbins,'normalization','probability');
 
+colorbar('position',[.95 .125 .01 .8]); 
 
-semilogx(xbins(1:end-1),NS1./sum(NS1),'b'); 
-hold on
-semilogx(xbins(1:end-1),NR1./sum(NR1),'--b'); 
+letter = {'(a)','(b)','(c)','(d)','(e)','(f)','(g)','(e)','(c)'};
 
-semilogx(xbins(1:end-1),NS2./sum(NS2),'r')
-semilogx(xbins(1:end-1),NR2./sum(NR2),'--r'); 
-hold off
-ylabel('N(e)de','interpreter','latex'); 
-grid on; box on; 
-xlabel('Error from SP-WIFF','interpreter','latex'); 
-set(gca,'xtick',[.001 .01 .1 1],'xticklabel',{'.1%','1%','10%','100%'}); 
-
-%
-Ax{4} = subplot('position',[.565 .15 .4 .35]);
-
-
-NS1 = histcounts(SAE_1(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NR1 = histcounts(RSE_1(use_int & lat_int < 0,:),xbins,'normalization','probability');
-
-NS2 = histcounts(SAE_2(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NR2 = histcounts(RSE_2(use_int & lat_int < 0,:),xbins,'normalization','probability');
-
-
-semilogx(xbins(1:end-1),NS1,'b'); 
-hold on
-semilogx(xbins(1:end-1),NR1,'--b'); 
-
-semilogx(xbins(1:end-1),NS2,'r')
-semilogx(xbins(1:end-1),NR2,'--r'); 
-hold off
-legend('NN-WIFF (SAE)','NN-WIFF (RAE)'); 
-ylabel('N(e)de','interpreter','latex'); 
-xlabel('Error from SP-WIFF','interpreter','latex'); 
-set(gca,'xtick',[.001 .01 .1 1],'xticklabel',{'.1%','1%','10%','100%'}); 
-
-grid on; box on; 
-
-p = legend('NN-WIFF (SAE)','NN-WIFF (RAE)','SP-WIFF-1 (SAE)','SP-WIFF-1 (RAE)', ...
-    'interpreter','latex','position',[.085 .01 .825 .05],'orientation','horizontal'); 
-set(p,'ItemTokenSize',[25 25])
+delete(findall(gcf,'Tag','legtag'))
 
 for i = 1:length(Ax)
     
@@ -177,11 +131,16 @@ for i = 1:length(Ax)
 
     set(Ax{i},'fontname','helvetica','fontsize',8,'xminortick','on','yminortick','on')
     
+    annotation('textbox',[posy(1) posy(2)+posy(4) - .02 .025 .025], ...
+        'String',letter{i},'LineStyle','none','FontName','Helvetica', ...
+        'FontSize',8,'Tag','legtag');
     
 end
+
 
 pos = [6.5 4]; 
 set(gcf,'windowstyle','normal','position',[0 0 pos],'paperposition',[0 0 pos],'papersize',pos,'units','inches','paperunits','inches');
 set(gcf,'windowstyle','normal','position',[0 0 pos],'paperposition',[0 0 pos],'papersize',pos,'units','inches','paperunits','inches');
+print('/Users/chorvat/Dropbox (Brown)/Apps/Overleaf/Light-under-Antarctic-Ice/Figures/Fig-0/Fig-0b','-dpdf','-r1200');
 
-print([figure_save_path 'Fig-3/Fig-3'],'-dpdf','-r1200');
+print([figure_save_path 'Fig-3/Fig-3.pdf'],'-dpdf','-r1200');

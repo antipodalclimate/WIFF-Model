@@ -24,31 +24,37 @@ close all
 
 class_preamble; 
 
-addpath([figure_path '/Fig-0/']); 
-
-make_fig_0; 
-
-
-
-training_preamble; 
-
 addpath([figure_path '/Fig-1/']); 
 
 make_fig_1; 
 
-addpath([figure_path '/Fig-2/']); 
+%%
+
 
 training_preamble; 
 
-make_fig_2; 
+addpath([figure_path '/Fig-2/']); 
 
-%%
-gcm_preamble; 
+make_fig_2; 
 
 addpath([figure_path '/Fig-3/']); 
 
+training_preamble; 
+
 make_fig_3; 
 
+%%
+recreate_gcm_data = 0;
+
+gcm_preamble; 
+
+addpath([figure_path '/Fig-4/']); 
+
+make_fig_4; 
+
+addpath([figure_path '/Fig-5/']); 
+
+make_fig_5; 
 
 
 
