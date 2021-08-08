@@ -50,7 +50,7 @@ plot(Cbins(1:end-1),errC-varC/2,'--k','linewidth',0.5);
 hold off
 xlim(Clims); 
 ylim([0 15]);
-ylabel('RSE (\%)','interpreter','latex'); 
+ylabel('SSE (\%)','interpreter','latex'); 
 
 Ax{2} = subplot(322);
 
@@ -68,7 +68,7 @@ plot(Hbins(1:end-1),errH+varH/2,'--k','linewidth',0.5);
 plot(Hbins(1:end-1),errH-varH/2,'--k','linewidth',0.5); 
 hold off
 xlim(Hlims); ylim([0 15]); 
-ylabel('RSE (\%)','interpreter','latex'); 
+ylabel('SSE (\%)','interpreter','latex'); 
 
 Ax{3} = subplot(323);
 
@@ -88,7 +88,7 @@ plot(Ebins(1:end-1),errE-varE/2,'--k','linewidth',0.5);
 hold off
 xlim(Elims); 
 ylim([0 15]); 
-ylabel('RSE (\%)','interpreter','latex'); 
+ylabel('SSE (\%)','interpreter','latex'); 
 
 Ax{4} = subplot(324); 
 
@@ -109,7 +109,7 @@ hold off
 set(gca,'xscale','log'); 
 xlim(Rlims); 
 ylim([0 25]); 
-ylabel('RSE (\%)','interpreter','latex'); 
+ylabel('SSE (\%)','interpreter','latex'); 
 
 %%
 

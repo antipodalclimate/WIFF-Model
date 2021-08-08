@@ -73,6 +73,7 @@ grid on; box on;
 xlim([rcent(1) rcent(end)]); 
 
 
+
 xlabel('Floe Size (m)','interpreter','latex'); 
 ylabel('A$_i$dr$_i$','interpreter','latex'); 
 p = legend('SP-WIFF','NN-WIFF','SP-WIFF-1','interpreter','latex');
@@ -115,17 +116,22 @@ Ax{3} = subplot('position',[.075 .15 .4 .35]);
 xbins = [linspace(0,1,200) Inf]; 
 
 SAE_NN = sum(abs(A_SP_int - A_NN_int),2);
-RSE_NN = sum(rcent.*abs(A_SP_int - A_NN_int),2) ./ sum(rcent.*A_SP_int,2); 
+SSE_NN = sum(rcent.*abs(A_SP_int - A_NN_int),2) ./ sum(rcent.*A_SP_int,2); 
 
 SAE_SP_1 = sum(abs(A_SP_int - A_SP_1_int),2);
-RSE_SP_1 = sum(rcent.*abs(A_SP_int - A_SP_1_int),2) ./ sum(rcent.*A_SP_int,2); 
+SSE_SP_1 = sum(rcent.*abs(A_SP_int - A_SP_1_int),2) ./ sum(rcent.*A_SP_int,2); 
+
+usevals = use_int & lat_int > 0;
 
 
+NS_NN = histcounts(SAE_NN(usevals,:),xbins,'normalization','probability');
+NR_NN = histcounts(SSE_NN(usevals,:),xbins,'normalization','probability');
 
-NS_NN = histcounts(SAE_NN(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NR_NN = histcounts(RSE_NN(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NS_SP_1 = histcounts(SAE_SP_1(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NR_SP_1 = histcounts(RSE_SP_1(use_int & lat_int < 0,:),xbins,'normalization','probability');
+NS_SP_1 = histcounts(SAE_SP_1(usevals,:),xbins,'normalization','probability');
+NR_SP_1 = histcounts(SSE_SP_1(usevals,:),xbins,'normalization','probability');
+
+fprintf('For Arctic NN, median SAE is %2.2f and median SSE is %2.2f \n ',100*median(SAE_NN(usevals)),100*median(SSE_NN(usevals))); 
+fprintf('For Arctic SP1, median SAE is %2.2f and median SSE is %2.2f \n ',100*median(SAE_SP_1(usevals)),100*median(SSE_SP_1(usevals))); 
 
 
 semilogx(xbins(1:end-1),NS_NN./sum(NS_NN),'b'); 
@@ -140,16 +146,21 @@ grid on; box on;
 xlabel('Error from SP-WIFF','interpreter','latex'); 
 set(gca,'xtick',[.001 .01 .1 1],'xticklabel',{'.1%','1%','10%','100%'}); 
 
+%%
 %
 Ax{4} = subplot('position',[.565 .15 .4 .35]);
 
+usevals = use_int & lat_int < 0;
 
-NS_NN = histcounts(SAE_NN(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NR_NN = histcounts(RSE_NN(use_int & lat_int < 0,:),xbins,'normalization','probability');
+NS_NN = histcounts(SAE_NN(usevals,:),xbins,'normalization','probability');
+NR_NN = histcounts(SSE_NN(usevals,:),xbins,'normalization','probability');
 
-NS_SP_1 = histcounts(SAE_SP_1(use_int & lat_int < 0,:),xbins,'normalization','probability');
-NR_SP_1 = histcounts(RSE_SP_1(use_int & lat_int < 0,:),xbins,'normalization','probability');
+NS_SP_1 = histcounts(SAE_SP_1(usevals,:),xbins,'normalization','probability');
+NR_SP_1 = histcounts(SSE_SP_1(usevals,:),xbins,'normalization','probability');
 
+
+fprintf('For Antarctic NN, median SAE is %2.2f and median SSE is %2.2f \n ',100*median(SAE_NN(usevals)),100*median(SSE_NN(usevals))); 
+fprintf('For Antarctic SP1, median SAE is %2.2f and median SSE is %2.2f \n ',100*median(SAE_SP_1(usevals)),100*median(SSE_SP_1(usevals))); 
 
 semilogx(xbins(1:end-1),NS_NN,'b'); 
 hold on
@@ -158,14 +169,14 @@ semilogx(xbins(1:end-1),NR_NN,'--b');
 semilogx(xbins(1:end-1),NS_SP_1,'r')
 semilogx(xbins(1:end-1),NR_SP_1,'--r'); 
 hold off
-legend('NN-WIFF (SAE)','NN-WIFF (RAE)'); 
+legend('NN-WIFF (SAE)','NN-WIFF (SSE)'); 
 ylabel('N(e)de','interpreter','latex'); 
 xlabel('Error from SP-WIFF','interpreter','latex'); 
 set(gca,'xtick',[.001 .01 .1 1],'xticklabel',{'.1%','1%','10%','100%'}); 
 
 grid on; box on; 
 
-p = legend('NN-WIFF (SAE)','NN-WIFF (RAE)','SP-WIFF-1 (SAE)','SP-WIFF-1 (RAE)', ...
+p = legend('NN-WIFF (SAE)','NN-WIFF (SSE)','SP-WIFF-1 (SAE)','SP-WIFF-1 (SSE)', ...
     'interpreter','latex','position',[.085 .01 .825 .05],'orientation','horizontal'); 
 set(p,'ItemTokenSize',[25 25])
 

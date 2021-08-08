@@ -87,7 +87,7 @@ plot(Cbins(1:end-1),acc_C,'k','linewidth',1);
 hold off
 xlim(Clims); 
 ylim([0 1]);
-ylabel('\%','interpreter','latex'); 
+ylabel('Fraction','interpreter','latex'); 
 grid on; box on; 
 xlabel('Ice Concentration','interpreter','latex'); 
 
