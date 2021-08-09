@@ -63,7 +63,7 @@ errCH(NCH < num_cutoff) = nan;
 % 
 
 %%
-climmer = [0 50]; 
+climmer = [0 100]; 
 
 
 Ax{1} = subplot('position',[.05 .55 .25 .4]);
@@ -125,6 +125,11 @@ letter = {'(a)','(b)','(c)','(d)','(e)','(f)','(g)','(e)','(c)'};
 
 delete(findall(gcf,'Tag','legtag'))
 
+annotation(gcf,'textbox','position',[.935 .935 .05 .05],'string','\%', ...
+    'FontName','Helvetica','LineStyle','none','interpreter','latex', ...
+         'FontSize',10,'Tag','legtag');
+
+     
 for i = 1:length(Ax)
     
     posy = get(Ax{i},'position');
