@@ -37,6 +37,8 @@ addpath([figure_path '/Fig-2/']);
 
 make_fig_2; 
 
+%%
+
 addpath([figure_path '/Fig-3/']); 
 
 training_preamble; 

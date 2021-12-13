@@ -65,7 +65,7 @@ accCE = (TPCE + TNCE)./(TNCE + FNCE + TPCE + TNCE);
 accHE = (TPHE + TNHE)./(TNHE + FNHE + TPHE + TNHE); 
 
 num_tot = length(indCH); 
-num_cutoff = num_tot / (2*100*100); % .01 % cutoff
+num_cutoff = num_tot / (2*100*100); % .005 % cutoff
 
 accHE(NHE < num_cutoff) = nan; 
 accCE(NCE < num_cutoff) = nan; 

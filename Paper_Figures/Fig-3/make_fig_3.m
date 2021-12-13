@@ -110,7 +110,7 @@ pcolor(Rbins(1:end-1),Cbins(1:end-1),errRC'); shading flat; grid on; box on;
 set(gca,'xscale','log');
 set(gca,'clim',climmer); 
 xlim(Rlims); ylim(Clims); 
-ylabel('Rep Radius','interpreter','latex'); 
+xlabel('Rep Radius','interpreter','latex'); 
 ylabel('Ice Concentration','interpreter','latex'); 
 
 

@@ -117,9 +117,10 @@ ylabel('SSE (\%)','interpreter','latex');
 Ax{5} = subplot(313);
 
 varvals = nanstd(Y_pred - Y_true,[],1); 
-semilogx(rcent,nanmean(Y_true,1),'k','linewidth',2); 
+semilogx(rcent,nanmean(Y_true,1),'-k','linewidth',2); 
 hold on
-semilogx(rcent,nanmean(Y_pred,1),'r','linewidth',1);
+semilogx(rcent,nanmean(Y_pred,1),'-r','linewidth',1);
+scatter(rcent,0*nanmean(Y_pred,1),50,'+','k'); 
 semilogx(rcent,nanmean(Y_true,1)+varvals,'--k','linewidth',0.5); 
 % 
 semilogx(rcent,nanmean(Y_true,1)-varvals,'--k','linewidth',0.5); 
